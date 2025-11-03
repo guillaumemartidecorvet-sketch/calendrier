@@ -50,9 +50,30 @@
       backdrop-filter: blur(2px);
     }
 
+    /* Titre + logo */
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      position:relative;
+    }
+    .header img{
+      height:42px;
+      width:auto;
+      border-radius:8px;
+      filter: drop-shadow(0 0 8px rgba(0,0,0,0.6));
+      transition: transform 0.3s ease;
+    }
+    .header img:hover{
+      transform: scale(1.08);
+    }
+
     h1{
       margin:0;
       font-size:clamp(18px, 3.2vw, 28px);
+      text-align:center;
+      white-space:nowrap;
     }
 
     .grid{
@@ -120,7 +141,11 @@
   </div>
 
   <div class="app">
-    <h1>🎁 Calendrier de l'Avent [Pro-Duction]</h1>
+    <div class="header">
+      <h1>🎁 Calendrier de l'Avent [Pro-Duction]</h1>
+      <img src="public/abrak.png" alt="Logo Abrak">
+    </div>
+
     <div class="grid" id="grid"></div>
   </div>
 
@@ -128,7 +153,7 @@
     /**********************************************************
      * CONFIGURATION TEST
      **********************************************************/
-    const test = 0;  // 🔧 Mets 1 pour tout tester, 0 pour mode normal
+    const test = 1;  // 🔧 Mets 1 pour tout tester, 0 pour mode normal
     const TOTAL = 24; // ✅ On s'arrête au 24 décembre
 
     const grid = document.getElementById('grid');
@@ -194,4 +219,3 @@
   </script>
 </body>
 </html>
-
