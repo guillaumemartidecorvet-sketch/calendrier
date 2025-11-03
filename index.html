@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calendrier de l'Avent [Pro-Duction]</title>
+  <style>
+    :root{
+      --cols: 6;
+      --gap: 14px;
+      --card-size: min(120px, calc((100vw - 40px) / var(--cols)));
+      --accent: #ffd166;
+      --glass: rgba(255,255,255,0.06);
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: Inter, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color: #fff;
+      background: #000;
+      overflow-x:hidden;
+    }
+
+    /* vidéo de fond */
+    .bg-video{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      overflow:hidden;
+    }
+    .bg-video video{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      filter: blur(6px) brightness(0.6);
+      transform: scale(1.03);
+    }
+
+    /* structure */
+    .app{
+      position:relative;
+      z-index:1;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:20px;
+      padding:28px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.45));
+      backdrop-filter: blur(2px);
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(18px, 3.2vw, 28px);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      gap: var(--gap);
+      width:100%;
+      max-width:1000px;
+    }
+
+    .card{
+      aspect-ratio: 1 / 1;
+      position:relative;
+      perspective:1200px;
+      cursor:pointer;
+    }
+    .card button{
+      all:unset;
+      display:block;
+      width:100%;
+      height:100%;
+      border-radius:14px;
+      position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2));
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(.2,.9,.2,1);
+    }
+    .face{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      backface-visibility:hidden;
+      border-radius:14px;
+      overflow:hidden;
+    }
+    .thumb img{
+      width:70%;
+    }
+    .inner{
+      transform: rotateY(180deg);
+      flex-direction:column;
+      background: rgba(0,0,0,0.4);
+    }
+    .inner img{
+      width:80%;
+    }
+    .card.open button{
+      transform: rotateY(-180deg);
+    }
+    .card.locked{
+      opacity:0.4;
+      cursor:default;
+      pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-video">
+    <video autoplay muted loop playsinline>
+      <source src="public/background.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <div class="app">
+    <h1>🎁 Calendrier de l'Avent [Pro-Duction]</h1>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <script>
+    /**********************************************************
+     * CONFIGURATION TEST
+     **********************************************************/
+    const test = 1;  // 🔧 Mets 1 pour tout tester, 0 pour mode normal
+    const TOTAL = 24; // ✅ On s'arrête au 24 décembre
+
+    const grid = document.getElementById('grid');
+    const now = new Date();
+    const YEAR = now.getFullYear();
+
+    const STORAGE_KEY = `advent_opened_${YEAR}`;
+    const opened = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
+    // ✅ Détermine si on peut cliquer sur le jour i
+    function isAvailable(i) {
+      if (test === 1) return true; // mode test → tout est accessible
+      const today = new Date();
+      const caseDate = new Date(YEAR, 11, i); // décembre (11)
+      return caseDate <= today;
+    }
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    for (let i = 1; i <= TOTAL; i++) {
+      const day = pad(i);
+      const card = document.createElement("div");
+      card.className = "card";
+      const btn = document.createElement("button");
+
+      const front = document.createElement("div");
+      front.className = "face thumb";
+      front.innerHTML = `<img src="public/${day}.png" alt="Jour ${day}">`;
+
+      const back = document.createElement("div");
+      back.className = "face inner";
+      back.innerHTML = `<img src="public/cadeau${day}.png" alt="Cadeau ${day}">`;
+
+      btn.appendChild(front);
+      btn.appendChild(back);
+      card.appendChild(btn);
+      grid.appendChild(card);
+
+      // 🔒 Gestion des verrous
+      if (!isAvailable(i)) {
+        card.classList.add("locked");
+      }
+
+      // 🔓 Restaure les cases ouvertes depuis le cache
+      if (opened[day]) {
+        card.classList.add("open");
+      }
+
+      // 🎬 Animation flip
+      btn.addEventListener("click", () => {
+        if (card.classList.contains("locked")) return;
+        card.classList.toggle("open");
+        if (card.classList.contains("open")) {
+          opened[day] = true;
+        } else {
+          delete opened[day];
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(opened));
+      });
+    }
+
+    console.log("✅ Calendrier chargé — Mode test:", test ? "TOUT OUVERT" : "DATE RÉELLE");
+  </script>
+</body>
+</html>
